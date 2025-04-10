@@ -1,27 +1,63 @@
-// src/components/Footer.tsx
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { FaLinkedin, FaInstagram, FaEnvelope } from "react-icons/fa";
+
 export function Footer() {
   return (
-    <footer className="bg-black text-white px-6 py-6 mt-10 text-sm">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between gap-4">
+    <footer className="border-t border-gray-200 mt-10 bg-white">
+      <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+        {/* Informações institucionais */}
         <div>
-          <p>Centro Cultural Kalunguinha © {new Date().getFullYear()}</p>
-          <p>Todos os direitos reservados.</p>
+          <h3 className="text-lg font-semibold text-gray-900">Centro Cultural Kalunguinha</h3>
+          <p className="text-sm text-gray-600 mt-1">Rua Fictícia, 123 – São Paulo, SP</p>
+          <p className="text-sm text-gray-600">contato@cckalunguinha.org.br</p>
         </div>
 
-        <div className="text-right">
-          <p>
-            Desenvolvido por{" "}
-            <a
-              href="https://www.linkedin.com/in/luvieira"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-300"
-            >
-              Lu Vieira
-            </a>
-          </p>
-          <p>São Paulo - SP</p>
+        {/* Redes sociais */}
+        <div className="flex gap-4 items-center">
+          <motion.a
+            href="https://instagram.com/cckalunguinha"
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.1 }}
+            className="text-gray-600 hover:text-black text-xl transition"
+          >
+            <FaInstagram />
+          </motion.a>
+
+          <motion.a
+            href="mailto:contato@cckalunguinha.org.br"
+            whileHover={{ scale: 1.1 }}
+            className="text-gray-600 hover:text-black text-xl transition"
+          >
+            <FaEnvelope />
+          </motion.a>
+
+          <motion.a
+            href="https://www.linkedin.com/in/henrique3"
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.1 }}
+            className="text-gray-600 hover:text-black text-xl transition"
+          >
+            <FaLinkedin />
+          </motion.a>
         </div>
+      </div>
+
+      {/* Créditos */}
+      <div className="bg-black text-white text-sm text-center py-3">
+        Desenvolvido com ❤️ por{" "}
+        <a
+          href="https://www.linkedin.com/in/henrique3"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-200"
+        >
+          Lu Vieira
+        </a>
       </div>
     </footer>
   );

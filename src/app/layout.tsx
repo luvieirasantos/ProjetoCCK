@@ -1,21 +1,21 @@
-// src/app/layout.tsx
 import "./globals.css";
-import type { Metadata } from "next";
-import { ReactNode } from "react";
-import { Footer } from "../components/Footer";
-import { HeaderWrapper } from "../components/HeaderWrapper";
+import { Inter } from "next/font/google";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
-export const metadata: Metadata = {
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata = {
   title: "Centro Cultural Kalunguinha",
-  description: "Espaço de cultura, educação e acolhimento.",
+  description: "Site oficial do CCK",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
-        <HeaderWrapper />
-        <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
+      <body className={inter.className}>
+        <Header />
+        <main className="pt-24 pb-16 px-4">{children}</main>
         <Footer />
       </body>
     </html>
