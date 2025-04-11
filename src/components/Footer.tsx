@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { FaLinkedin, FaInstagram, FaEnvelope } from "react-icons/fa";
 
 export function Footer() {

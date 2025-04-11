@@ -7,8 +7,20 @@ import { LivroForm } from "@/components/LivroForm";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
+// Tipagem correta
+interface Livro {
+  id: string;
+  titulo: string;
+  autor: string;
+  tema: string;
+  classificacao: "adulto" | "infantojuvenil";
+  status: "disponível" | "não encontrado" | "emprestado";
+  imagem?: string;
+  criadoPor?: string;
+}
+
 export default function AdminBiblioteca() {
-  const [livros, setLivros] = useState<any[]>([]);
+  const [livros, setLivros] = useState<Livro[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { currentUser } = useAuth();
@@ -24,7 +36,7 @@ export default function AdminBiblioteca() {
   async function carregarLivros() {
     setLoading(true);
     const lista = await getLivros();
-    setLivros(lista);
+    setLivros(lista as Livro[]);
     setLoading(false);
   }
 
@@ -33,7 +45,7 @@ export default function AdminBiblioteca() {
     carregarLivros();
   }
 
-  async function handleAdd(livro: any) {
+  async function handleAdd(livro: Omit<Livro, "id">) {
     await addLivro({ ...livro, criadoPor: currentUser || "admin" });
     carregarLivros();
   }
