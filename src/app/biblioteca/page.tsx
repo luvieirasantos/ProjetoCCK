@@ -12,7 +12,6 @@ interface Livro {
   classificacao: "adulto" | "infantojuvenil";
   status: "disponível" | "não encontrado" | "emprestado";
   imagem?: string;
-  criadoPor?: string;
 }
 
 export default function BibliotecaPage() {
@@ -21,7 +20,6 @@ export default function BibliotecaPage() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [itensPorPagina, setItensPorPagina] = useState(9);
 
-  // Atualiza quantidade com base na tela
   useEffect(() => {
     const atualizarItens = () => {
       const largura = window.innerWidth;
@@ -36,16 +34,8 @@ export default function BibliotecaPage() {
 
   useEffect(() => {
     async function fetchLivros() {
-      const { data, error } = await supabase
-        .from("livros")
-        .select("*")
-        .order("titulo", { ascending: true });
-
-      if (error) {
-        console.error("Erro ao buscar livros:", error.message);
-      } else {
-        setLivros(data as Livro[]);
-      }
+      const { data } = await supabase.from("livros").select("*").order("titulo", { ascending: true });
+      if (data) setLivros(data as Livro[]);
     }
 
     fetchLivros();
@@ -69,7 +59,7 @@ export default function BibliotecaPage() {
         value={busca}
         onChange={(e) => {
           setBusca(e.target.value);
-          setPaginaAtual(1); // Reinicia para página 1 em nova busca
+          setPaginaAtual(1);
         }}
         className="w-full sm:max-w-sm border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
       />
@@ -93,16 +83,13 @@ export default function BibliotecaPage() {
               )}
               <h2 className="text-lg font-semibold">{livro.titulo}</h2>
               <p className="text-sm text-gray-600">Autor: {livro.autor}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                {livro.tema} • {livro.classificacao}
-              </p>
+              <p className="text-xs text-gray-400 mt-1">{livro.tema} • {livro.classificacao}</p>
               <p className="text-xs text-gray-400">Status: {livro.status}</p>
             </Link>
           ))}
         </div>
       )}
 
-      {/* Paginação */}
       {totalPaginas > 1 && (
         <div className="flex justify-center items-center gap-4 mt-6">
           <button
@@ -112,9 +99,7 @@ export default function BibliotecaPage() {
           >
             Página anterior
           </button>
-          <span className="text-sm text-gray-700">
-            Página {paginaAtual} de {totalPaginas}
-          </span>
+          <span className="text-sm text-gray-700">Página {paginaAtual} de {totalPaginas}</span>
           <button
             disabled={paginaAtual === totalPaginas}
             onClick={() => setPaginaAtual(p => p + 1)}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { AuthGuard } from "@/components/AuthGuard";
+import { useAuth } from "@/context/AuthContext";
 
 interface Documento {
   id: string;
@@ -15,21 +16,34 @@ interface Documento {
 const categorias = ["Horários", "Planejamento", "Relatórios", "Outros"];
 
 export default function DocumentosPage() {
+  const { currentUser } = useAuth();
+  const router = useRouter();
+
   const [titulo, setTitulo] = useState("");
   const [categoria, setCategoria] = useState("Horários");
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [documentos, setDocumentos] = useState<Documento[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function carregarDocumentos() {
-      const { data, error } = await supabase.from("documentos").select("*").order("criado_em", { ascending: false });
-      if (!error && data) {
-        setDocumentos(data as Documento[]);
-      }
+    if (!currentUser) {
+      router.replace("/login");
+    } else {
+      carregarDocumentos();
     }
+  }, [currentUser]);
 
-    carregarDocumentos();
-  }, []);
+  async function carregarDocumentos() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("documentos")
+      .select("*")
+      .order("criado_em", { ascending: false });
+    if (!error && data) {
+      setDocumentos(data as Documento[]);
+    }
+    setLoading(false);
+  }
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
@@ -37,7 +51,7 @@ export default function DocumentosPage() {
 
     const nomeArquivo = `${Date.now()}-${arquivo.name}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("documentos")
       .upload(nomeArquivo, arquivo);
 
@@ -47,7 +61,9 @@ export default function DocumentosPage() {
       return;
     }
 
-    const url = supabase.storage.from("documentos").getPublicUrl(nomeArquivo).data.publicUrl;
+    const url = supabase.storage
+      .from("documentos")
+      .getPublicUrl(nomeArquivo).data.publicUrl;
 
     const { error: insertError } = await supabase.from("documentos").insert([
       {
@@ -64,85 +80,95 @@ export default function DocumentosPage() {
     } else {
       setTitulo("");
       setArquivo(null);
-      window.location.reload();
+      carregarDocumentos();
     }
   }
 
+  if (!currentUser) return null;
+
   return (
-    <AuthGuard>
-      <section className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-2xl font-bold text-gray-900">📄 Gerenciar Documentos</h1>
+    <section className="max-w-4xl mx-auto space-y-8">
+      <h1 className="text-2xl font-bold text-gray-900">📄 Gerenciar Documentos</h1>
 
-        {/* Formulário */}
-        <form onSubmit={handleUpload} className="bg-white p-6 rounded-xl border shadow space-y-4">
-          <div>
-            <label className="block text-sm text-gray-700 font-medium">Título do documento</label>
-            <input
-              type="text"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 font-medium">Categoria</label>
-            <select
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border rounded"
-            >
-              {categorias.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700 font-medium">Arquivo</label>
-            <input
-              type="file"
-              onChange={(e) => setArquivo(e.target.files?.[0] || null)}
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <button type="submit" className="bg-black text-white px-5 py-2 rounded hover:opacity-90 transition">
-            Enviar documento
-          </button>
-        </form>
-
-        {/* Lista */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800">Documentos enviados</h2>
-          {documentos.length === 0 ? (
-            <p className="text-sm text-gray-500">Nenhum documento encontrado.</p>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {documentos.map((doc) => (
-                <li key={doc.id} className="py-3 flex justify-between items-center">
-                  <div>
-                    <p className="font-medium text-gray-800">{doc.titulo}</p>
-                    <p className="text-sm text-gray-500">{doc.categoria}</p>
-                  </div>
-                  <a
-                    href={doc.arquivo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Baixar
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
+      {/* Formulário */}
+      <form
+        onSubmit={handleUpload}
+        className="bg-white p-6 rounded-xl border shadow space-y-4"
+      >
+        <div>
+          <label className="block text-sm text-gray-700 font-medium">
+            Título do documento
+          </label>
+          <input
+            type="text"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            className="mt-1 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          />
         </div>
-      </section>
-    </AuthGuard>
+
+        <div>
+          <label className="block text-sm text-gray-700 font-medium">Categoria</label>
+          <select
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            className="mt-1 w-full px-4 py-2 border rounded"
+          >
+            {categorias.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-700 font-medium">Arquivo</label>
+          <input
+            type="file"
+            onChange={(e) => setArquivo(e.target.files?.[0] || null)}
+            className="mt-1"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-black text-white px-5 py-2 rounded hover:opacity-90 transition"
+        >
+          Enviar documento
+        </button>
+      </form>
+
+      {/* Lista */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-800">Documentos enviados</h2>
+        {loading ? (
+          <p className="text-sm text-gray-500">Carregando documentos...</p>
+        ) : documentos.length === 0 ? (
+          <p className="text-sm text-gray-500">Nenhum documento encontrado.</p>
+        ) : (
+          <ul className="divide-y divide-gray-200">
+            {documentos.map((doc) => (
+              <li key={doc.id} className="py-3 flex justify-between items-center">
+                <div>
+                  <p className="font-medium text-gray-800">{doc.titulo}</p>
+                  <p className="text-sm text-gray-500">{doc.categoria}</p>
+                </div>
+                <a
+                  href={doc.arquivo_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Baixar
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }

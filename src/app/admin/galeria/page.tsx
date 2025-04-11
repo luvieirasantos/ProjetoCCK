@@ -1,7 +1,8 @@
 "use client";
 
-import { AuthGuard } from "@/components/AuthGuard";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 interface Midia {
@@ -12,24 +13,33 @@ interface Midia {
 }
 
 export default function GaleriaPage() {
+  const { currentUser } = useAuth();
+  const router = useRouter();
+
   const [titulo, setTitulo] = useState("");
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [galeria, setGaleria] = useState<Midia[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function carregarGaleria() {
-      const { data, error } = await supabase
-        .from("galeria_midia")
-        .select("*")
-        .order("criado_em", { ascending: false });
-
-      if (!error && data) {
-        setGaleria(data as Midia[]);
-      }
+    if (!currentUser) {
+      router.replace("/login");
+    } else {
+      carregarGaleria();
     }
+  }, [currentUser]);
 
-    carregarGaleria();
-  }, []);
+  async function carregarGaleria() {
+    const { data, error } = await supabase
+      .from("galeria_midia")
+      .select("*")
+      .order("criado_em", { ascending: false });
+
+    if (!error && data) {
+      setGaleria(data as Midia[]);
+    }
+    setLoading(false);
+  }
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
@@ -37,7 +47,7 @@ export default function GaleriaPage() {
 
     const nome = `${Date.now()}-${arquivo.name}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("galeriamidia")
       .upload(nome, arquivo);
 
@@ -61,69 +71,74 @@ export default function GaleriaPage() {
     } else {
       setTitulo("");
       setArquivo(null);
-      window.location.reload();
+      carregarGaleria();
     }
   }
 
+  if (!currentUser) return null;
+
   return (
-    <AuthGuard>
-      <section className="max-w-5xl mx-auto space-y-10">
+    <section className="max-w-5xl mx-auto space-y-10">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">🖼️ Galeria de Mídia</h1>
+        <p className="text-gray-600">Envie imagens para serem usadas no site</p>
+      </div>
+
+      {/* Formulário */}
+      <form
+        onSubmit={handleUpload}
+        className="bg-white p-6 rounded-xl border shadow space-y-4"
+      >
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">🖼️ Galeria de Mídia</h1>
-          <p className="text-gray-600">Envie imagens para serem usadas no site</p>
+          <label className="block text-sm font-medium text-gray-700">Título da imagem</label>
+          <input
+            type="text"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            required
+            className="mt-1 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
+          />
         </div>
 
-        {/* Formulário */}
-        <form onSubmit={handleUpload} className="bg-white p-6 rounded-xl border shadow space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Título da imagem</label>
-            <input
-              type="text"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              required
-              className="mt-1 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Imagem</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setArquivo(e.target.files?.[0] || null)}
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Imagem</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setArquivo(e.target.files?.[0] || null)}
-              required
-            />
-          </div>
+        <button
+          type="submit"
+          className="bg-black text-white px-5 py-2 rounded hover:opacity-90 transition"
+        >
+          Enviar imagem
+        </button>
+      </form>
 
-          <button
-            type="submit"
-            className="bg-black text-white px-5 py-2 rounded hover:opacity-90 transition"
-          >
-            Enviar imagem
-          </button>
-        </form>
-
-        {/* Galeria */}
+      {/* Galeria */}
+      {loading ? (
+        <p className="text-sm text-gray-500">Carregando imagens...</p>
+      ) : galeria.length === 0 ? (
+        <p className="text-gray-500 text-sm">Nenhuma imagem enviada ainda.</p>
+      ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {galeria.length === 0 ? (
-            <p className="text-gray-500 text-sm">Nenhuma imagem enviada ainda.</p>
-          ) : (
-            galeria.map((img) => (
-              <div key={img.id} className="relative group">
-                <img
-                  src={img.url}
-                  alt={img.titulo}
-                  className="w-full h-44 object-cover rounded shadow"
-                />
-                <div className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-center px-2 text-sm font-medium rounded transition">
-                  {img.titulo}
-                </div>
+          {galeria.map((img) => (
+            <div key={img.id} className="relative group">
+              <img
+                src={img.url}
+                alt={img.titulo}
+                className="w-full h-44 object-cover rounded shadow"
+              />
+              <div className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-center px-2 text-sm font-medium rounded transition">
+                {img.titulo}
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
-      </section>
-    </AuthGuard>
+      )}
+    </section>
   );
 }

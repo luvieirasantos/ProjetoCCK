@@ -1,11 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -14,13 +16,9 @@ export default function LoginPage() {
     e.preventDefault();
     setErro("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password: senha,
-    });
-
-    if (error) {
-      setErro("Email ou senha inválidos.");
+    const erroLogin = await login(email, senha);
+    if (erroLogin) {
+      setErro(erroLogin);
     } else {
       router.push("/admin");
     }

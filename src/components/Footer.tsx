@@ -11,7 +11,7 @@ export function Footer() {
         {/* Informações institucionais */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Centro Cultural Kalunguinha</h3>
-          <p className="text-sm text-gray-600 mt-1">Rua Fictícia, 123 – São Paulo, SP</p>
+          <p className="text-sm text-gray-600 mt-1">Rua Belgrado, 255 – São Paulo, SP</p>
           <p className="text-sm text-gray-600">contato@cckalunguinha.org.br</p>
         </div>
 
