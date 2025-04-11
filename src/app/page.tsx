@@ -1,19 +1,26 @@
-// src/app/page.tsx
+import { CalendarioAtividades } from "@/components/CalendarioAtividades";
+
 export default function Home() {
   return (
     <section className="space-y-20">
       {/* Hero */}
-      <div className="text-center mt-10">
-        <h1 className="text-3xl sm:text-5xl font-bold text-gray-900">
+      <div className="text-center mt-10 space-y-6">
+        <h1 className="text-4xl sm:text-5xl font-bold text-black tracking-tight leading-tight">
           Um espaço de cuidado, cultura e transformação
         </h1>
-        <p className="mt-4 text-gray-600 text-lg max-w-xl mx-auto">
-          O Centro Cultural Kalunguinha acolhe, forma e inspira. Aqui, crianças, educadores e famílias encontram cultura, arte e pertencimento.
+        <p className="text-gray-700 text-lg sm:text-xl max-w-3xl mx-auto leading-relaxed">
+          O Centro Cultural Kalunguinha acolhe, forma e inspira. Aqui, crianças, educadores e
+          famílias encontram cultura, arte e pertencimento.
         </p>
       </div>
 
+      {/* Calendário de Atividades */}
+      <div className="max-w-5xl mx-auto">
+        <CalendarioAtividades />
+      </div>
+
       {/* Destaques */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center px-4">
         <Feature
           title="📚 Biblioteca"
           description="Mais de 1000 livros para todas as idades. Acesse, explore e leia com a comunidade."
@@ -40,7 +47,8 @@ export default function Home() {
       <div className="bg-black text-white rounded-xl px-8 py-12 text-center">
         <h2 className="text-2xl font-semibold">Apoie o Kalunguinha</h2>
         <p className="mt-2 text-gray-300 max-w-xl mx-auto">
-          Sua contribuição ajuda a manter um espaço seguro, criativo e cheio de amor para nossa comunidade.
+          Sua contribuição ajuda a manter um espaço seguro, criativo e cheio de amor para nossa
+          comunidade.
         </p>
         <a
           href="/apoie"
@@ -65,7 +73,7 @@ function Feature({
   return (
     <a
       href={href}
-      className="border border-gray-200 rounded-lg p-6 hover:shadow-md hover:scale-[1.02] transition-all bg-white"
+      className="border border-gray-300 rounded-lg p-6 hover:shadow-lg hover:scale-[1.01] transition-all bg-white"
     >
       <h3 className="text-lg font-semibold text-black mb-2">{title}</h3>
       <p className="text-sm text-gray-600">{description}</p>

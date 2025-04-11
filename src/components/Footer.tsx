@@ -18,7 +18,7 @@ export function Footer() {
         {/* Redes sociais */}
         <div className="flex gap-4 items-center">
           <motion.a
-            href="https://instagram.com/cckalunguinha"
+            href="https://instagram.com/centroculturalkalunguinha"
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.1 }}
@@ -49,7 +49,7 @@ export function Footer() {
 
       {/* Créditos */}
       <div className="bg-black text-white text-sm text-center py-3">
-        Desenvolvido com ❤️ por{" "}
+        Desenvolvido por{" "}
         <a
           href="https://www.linkedin.com/in/henrique3"
           target="_blank"
