@@ -1,92 +1,99 @@
 "use client";
 
-import { calendarioAtividades } from "@/data/calendarioAtividades";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+interface CalendarioItem {
+  id: string;
+  mes: string;
+  data: string;
+  atividades: string;
+}
 
 export function CalendarioAtividades() {
+  const [calendario, setCalendario] = useState<CalendarioItem[]>([]);
+  const [indiceAtual, setIndiceAtual] = useState(0);
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data, error } = await supabase
+        .from("calendario")
+        .select("*")
+        .order("criado_em", { ascending: true });
+
+      if (!error && data) {
+        setCalendario(data);
+      } else {
+        console.error("Erro ao buscar calendário:", error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  const avancar = () => {
+    if (indiceAtual < calendario.length - 1) setIndiceAtual((i) => i + 1);
+  };
+
+  const voltar = () => {
+    if (indiceAtual > 0) setIndiceAtual((i) => i - 1);
+  };
+
+  const ativo = calendario[indiceAtual];
+
   return (
-    <section className="py-14 px-4 bg-white border border-gray-200 rounded-xl shadow-sm">
-      <h2 className="text-center text-2xl sm:text-3xl font-bold text-black mb-10 tracking-tight">
+    <section className="bg-white rounded-2xl shadow-md py-10 px-6 text-center">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-8">
         Calendário de Atividades – 1º Semestre
       </h2>
 
-      <div className="relative max-w-4xl mx-auto">
-        {/* Swiper */}
-        <Swiper
-          modules={[Navigation, Pagination]}
-          spaceBetween={30}
-          slidesPerView={1}
-          navigation={{
-            nextEl: ".swiper-button-next-custom",
-            prevEl: ".swiper-button-prev-custom",
-          }}
-          pagination={{ clickable: true }}
-          autoHeight
-        >
-          {calendarioAtividades.map((mes) => (
-            <SwiperSlide key={mes.mes}>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center w-full h-auto transition-all duration-300">
-                <h3 className="text-lg sm:text-xl font-semibold uppercase text-black mb-4">
-                  {mes.mes}
-                </h3>
-                {mes.dias.map((dia, index) => (
-                  <div key={index} className="mb-4 text-sm sm:text-base">
-                    <p className="font-medium text-gray-700">{dia.data}</p>
-                    <ul className="mt-1 text-gray-600 space-y-1">
-                      {dia.atividades.map((a, i) => (
-                        <li key={i}>{a}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        {/* Setas externas e minimalistas */}
-        <button
-          className="swiper-button-prev-custom absolute left-[-2.5rem] top-1/2 transform -translate-y-1/2 z-10 text-black hover:opacity-60 transition"
-          aria-label="Mês anterior"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-chevron-left"
+      {ativo && (
+        <div className="relative max-w-3xl mx-auto">
+          {/* Botão voltar */}
+          <button
+            onClick={voltar}
+            disabled={indiceAtual === 0}
+            className="absolute -left-10 top-1/2 -translate-y-1/2 p-2 rounded hover:bg-gray-100 transition disabled:opacity-30"
+            aria-label="Voltar"
           >
-            <path d="M15 18L9 12l6-6" />
-          </svg>
-        </button>
+            <ChevronLeft size={24} />
+          </button>
 
-        <button
-          className="swiper-button-next-custom absolute right-[-2.5rem] top-1/2 transform -translate-y-1/2 z-10 text-black hover:opacity-60 transition"
-          aria-label="Próximo mês"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-chevron-right"
+          {/* Card do mês */}
+          <div className="bg-gray-50 rounded-xl py-6 px-6 min-h-[180px] flex flex-col items-center justify-center border">
+            <h3 className="text-lg font-semibold text-gray-800 uppercase tracking-wide">
+              {ativo.mes}
+            </h3>
+            <p className="text-sm text-gray-600 font-medium mt-2">{ativo.data}</p>
+            <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
+              {ativo.atividades}
+            </p>
+          </div>
+
+          {/* Botão avançar */}
+          <button
+            onClick={avancar}
+            disabled={indiceAtual === calendario.length - 1}
+            className="absolute -right-10 top-1/2 -translate-y-1/2 p-2 rounded hover:bg-gray-100 transition disabled:opacity-30"
+            aria-label="Avançar"
           >
-            <path d="M9 6l6 6-6 6" />
-          </svg>
-        </button>
-      </div>
+            <ChevronRight size={24} />
+          </button>
+
+          {/* Indicadores */}
+          <div className="flex justify-center mt-6 gap-2">
+            {calendario.map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  idx === indiceAtual ? "bg-black" : "bg-gray-300"
+                }`}
+              ></div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
