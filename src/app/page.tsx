@@ -1,4 +1,5 @@
 import { CalendarioAtividades } from "@/components/CalendarioAtividades";
+import { BookOpen, Paintbrush, HeartHandshake, GraduationCap } from "lucide-react";
 
 export default function Home() {
   return (
@@ -22,22 +23,26 @@ export default function Home() {
       {/* Destaques */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center px-4">
         <Feature
-          title="📚 Biblioteca"
+          icon={<BookOpen className="w-6 h-6 mx-auto mb-2 text-black" />}
+          title="Biblioteca"
           description="Mais de 1000 livros para todas as idades. Acesse, explore e leia com a comunidade."
           href="/biblioteca"
         />
         <Feature
-          title="🎨 Oficinas"
+          icon={<Paintbrush className="w-6 h-6 mx-auto mb-2 text-black" />}
+          title="Oficinas"
           description="Grafite, percussão, autocuidado e muito mais. Para crianças e adultos."
           href="/oficinas"
         />
         <Feature
-          title="🫶 Juquinha"
+          icon={<HeartHandshake className="w-6 h-6 mx-auto mb-2 text-black" />}
+          title="Juquinha"
           description="Grupo de apoio para responsáveis com rodas de conversa e oficinas especiais."
           href="/juquinha"
         />
         <Feature
-          title="🎓 Formação"
+          icon={<GraduationCap className="w-6 h-6 mx-auto mb-2 text-black" />}
+          title="Formação"
           description="Cursos e encontros para educadores. Aprendizagem transformadora e coletiva."
           href="/formacao"
         />
@@ -65,16 +70,19 @@ function Feature({
   title,
   description,
   href,
+  icon,
 }: {
   title: string;
   description: string;
   href: string;
+  icon: React.ReactNode;
 }) {
   return (
     <a
       href={href}
       className="border border-gray-300 rounded-lg p-6 hover:shadow-lg hover:scale-[1.01] transition-all bg-white"
     >
+      {icon}
       <h3 className="text-lg font-semibold text-black mb-2">{title}</h3>
       <p className="text-sm text-gray-600">{description}</p>
     </a>
